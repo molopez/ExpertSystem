@@ -86,7 +86,21 @@
 	(floor_sign yes)
 	=>
 	(printout t "This is a sign for the floor")
+	(send [sign] put-type floor)
+	(send [sign] print)
 	(printout t crlf))
+
+(defrule sign_is_floor
+	?ins <- (object (is-a SIGN) (type floor))
+	=>
+	(printout t "this is an instance sign" crlf)
+	(send ?ins print)
+	(printout t crlf))
+	
+(defrule sign_type
+	(object (is-a SIGN) (type ?tp))
+	=>
+	(printout t "The chosen type is " ?tp crlf))
 	
 (defrule determine_banner_length ""
 	(not (banner_length ?))
