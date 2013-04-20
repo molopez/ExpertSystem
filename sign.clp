@@ -69,18 +69,24 @@
 ;;; 	ask questions and set values
 ;;; =======================================================
 
+; asking to see if it is a floor sign
+; if is not defined then ask the question
 (defrule determine_floor_sign ""
 	(declare (salience 10))
 	(not (floor_sign ?))
 	=>
 	(assert (floor_sign (yes-or-no "Will this sign be put on the floor (yes/no)? ")))) 
-	
+
+; same as above for sing type	
 (defrule determine_sign_type ""
 	(declare (salience 10))
 	(not (sign_type ?))
 	=>
 	(assert (sign_type (ask-question "What is the sign type (banner/hanging)? " banner hanging))))
 	
+; if it is a floor sign 	
+; send it to the instance [sing] and fill in the type slot
+; print the instance information
 (defrule determine_floor ""
 	(declare (salience 12))
 	(floor_sign yes)
@@ -90,6 +96,8 @@
 	(send [sign] print)
 	(printout t crlf))
 
+; pass an object of type SIGN to ?ins with type floor
+; print the object
 (defrule sign_is_floor
 	?ins <- (object (is-a SIGN) (type floor))
 	=>
@@ -97,11 +105,14 @@
 	(send ?ins print)
 	(printout t crlf))
 	
+; test choosing an object of type SIGN and some arbitrary type
+; print the type of the object
 (defrule sign_type
 	(object (is-a SIGN) (type ?tp))
 	=>
 	(printout t "The chosen type is " ?tp crlf))
 	
+; testing passing in more info from user
 (defrule determine_banner_length ""
 	(not (banner_length ?))
 	=>
