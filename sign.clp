@@ -1,7 +1,8 @@
 
 ;;; ===================================================
 ;;;
-;;;  Program to find the price of making a sing
+;;;  Program to suggest costumer type of sign he/she 
+;;;  should buy for the occasion
 ;;;
 ;;; ===================================================
 
@@ -16,8 +17,10 @@
      (slot size)
      (slot shape)
      (slot material)
-     (slot order)
-     (slot price)
+     (slot quantity)
+     (slot wearability)
+     (slot indoor)
+     (slot thickness)
      (slot printed))
      
 (defclass BANNER
@@ -28,22 +31,19 @@
 	
 (defclass HANG_SIGN
 	(is-a SIGN)
-	(slot thickness)
-	(slot indoor_outdoor)
-	(slot engraved)
-	(slot hanger_type))
+	(slot hand_painted)
+	(slot engraved))
 	
 ;;; =====================================================
 ;;; 	instance declarations
 ;;; =====================================================
 
 (definstances myInstances
-	(sign of SIGN)
 	(banner of BANNER)
-	(h_sign of HANG_SIGN))
+	(hanging of HANG_SIGN))
 	
 ;;; =====================================================
-;;; 	functions
+;;; 	functions to get input from user
 ;;; 	taken from the auto.clp example
 ;;; =====================================================
 
@@ -69,51 +69,84 @@
 ;;; 	ask questions and set values
 ;;; =======================================================
 
-; asking to see if it is a floor sign
-; if is not defined then ask the question
-(defrule determine_floor_sign ""
-	(declare (salience 10))
-	(not (floor_sign ?))
-	=>
-	(assert (floor_sign (yes-or-no "Will this sign be put on the floor (yes/no)? ")))) 
-
-; same as above for sing type	
+;;; asking to see if it is a floor sign
+;;; if is not defined then ask the question
 (defrule determine_sign_type ""
 	(declare (salience 10))
-	(not (sign_type ?))
+	(not (type ?))
 	=>
-	(assert (sign_type (ask-question "What is the sign type (banner/hanging)? " banner hanging))))
+	(assert (type (ask-question "What type of sign (banner/hanging)? " banner hanging)))) 
 	
-; if it is a floor sign 	
-; send it to the instance [sing] and fill in the type slot
-; print the instance information
-(defrule determine_floor ""
-	(declare (salience 12))
-	(floor_sign yes)
+(defrule set_sign_type ""
+	(type banner)
 	=>
-	(printout t "This is a sign for the floor")
-	(send [sign] put-type floor)
-	(send [sign] print)
+	(send [banner] put-type banner)
+	(send [banner] print)
 	(printout t crlf))
 
-; pass an object of type SIGN to ?ins with type floor
-; print the object
+(defrule set_sign_hanging ""
+	(type hanging)
+	=>
+	(send [hanging] put-type hanging)
+	(send [hanging] print)
+	(printout t crlf))
+	
+(defrule print_sign_hanging ""
+	?ins <- (object (is-a SIGN) (type hanging))
+	=>
+	(send ?ins put-color blue)
+	(send ?ins print)
+	(printout t crlf))
+	
+(defrule print_sign_banner ""
+	?ins <- (object (is-a SIGN) (type banner))
+	=>
+	(send ?ins put-color red)
+	(send ?ins print)
+	(printout t crlf))
+	
+;;; determine used indoor or outdoor	
+(defrule determine_indoor ""
+	(declare (salience 10))
+	(not (indoor ?))
+	=>
+	(assert (indoor (yes-or-no "Will this sign be used inside (yes/no)? "))))
+	
+;;; if it is a floor sign 	
+;;; send it to the instance [sing] and fill in the type slot
+;;; print the instance information
+(defrule set-indoor ""
+	(declare (salience 12))
+	(indoor ?test)
+	=>
+	(printout t "This is a sign for the floor")
+	(send [banner] put-indoor ?test)
+	(send [banner] print)
+	(printout t crlf))
+
+;;; pass an object of type SIGN to ?ins with type floor
+;;; print the object
 (defrule sign_is_floor
-	?ins <- (object (is-a SIGN) (type floor))
+	?ins <- (object (is-a SIGN) (color full))
 	=>
 	(printout t "this is an instance sign" crlf)
 	(send ?ins print)
 	(printout t crlf))
 	
-; test choosing an object of type SIGN and some arbitrary type
-; print the type of the object
-(defrule sign_type
-	(object (is-a SIGN) (type ?tp))
-	=>
-	(printout t "The chosen type is " ?tp crlf))
+;;; test choosing an object of type SIGN and some arbitrary type
+;;; print the type of the object
+;(defrule sign_type
+;	(object (is-a SIGN) (type ?tp))
+;	=>
+;	(printout t "The chosen type is " ?tp crlf))
 	
-; testing passing in more info from user
+;;; testing passing in more info from user
 (defrule determine_banner_length ""
 	(not (banner_length ?))
 	=>
 	(assert (banner_length (ask-question "Enter the length of the banner (1/2/3)? " 1 2 3)))) 
+	
+	
+;;; =============================================================
+;;; 	set rules for suggestions
+;;; =============================================================
