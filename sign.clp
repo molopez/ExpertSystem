@@ -18,14 +18,18 @@
      (slot wearability)
      (slot engraved)
      (slot hand_painted)
+     (slot business)
      (slot indoor))
      
 (defclass MATERIAL
-	(is-a USER)
-	(slot thickness)
-	(slot size)
-	(slot structure)
-	(slot type))
+    (is-a USER)
+    (slot thickness)
+    (slot size)
+    (slot structure)
+    (slot reflective)
+    (slot glow)
+    (slot adhesive)
+    (slot type))
 	
 ;;; =====================================================
 ;;; 	instance declarations
@@ -34,6 +38,9 @@
 (definstances myInstances
 	(sign of SIGN)
 	(material of MATERIAL))
+	;(metal of MATERIAL)
+	;(wood of MATERIAL)
+	;(plastic of MATERIAL))
 	
 ;;; =====================================================
 ;;; 	functions to get input from user
@@ -57,140 +64,87 @@
    (if (or (eq ?response yes) (eq ?response y))
        then yes 
        else no))
-       
-;;; =======================================================
-;;; 	ask questions and set values
-;;; =======================================================
-
-;;; asking to see if it is a floor sign
-;;; if is not defined then ask the question
-;(defrule determine_sign_type ""
-;	(declare (salience 10))
-;	(not (type ?))
-;	=>
-;	(assert (type (ask-question "What type of sign (banner/hanging)? " banner hanging)))) 
-	
-;(defrule set_sign_type ""
-;	(type banner)
-;	=>
-;	(send [banner] put-type banner)
-;	(send [banner] print)
-;	(printout t crlf))
-
-;(defrule set_sign_hanging ""
-;	(type hanging)
-;	=>
-;	(send [hanging] put-type hanging)
-;	(send [hanging] print)
-;	(printout t crlf))
-	
-;(defrule print_sign_hanging ""
-;	?ins <- (object (is-a SIGN) (type hanging))
-;	=>
-;	(send ?ins put-color blue)
-;	(send ?ins print)
-;	(printout t crlf))
-	
-;(defrule print_sign_banner ""
-;	?ins <- (object (is-a SIGN) (type banner))
-;	=>
-;	(send ?ins put-color red)
-;	(send ?ins print)
-;	(printout t crlf))
-	
-;;; determine used indoor or outdoor	
-;(defrule determine_indoor ""
-;	(declare (salience 10))
-;	(not (indoor ?))
-;	=>
-;	(assert (indoor (yes-or-no "Will this sign be used inside (yes/no)? "))))
-	
-;;; if it is a floor sign 	
-;;; send it to the instance [sing] and fill in the type slot
-;;; print the instance information
-;(defrule set-indoor ""
-;	(declare (salience 12))
-;	(indoor ?test)
-;	=>
-;	(printout t "This is a sign for the floor")
-;	(send [banner] put-indoor ?test)
-;	(send [banner] print)
-;	(printout t crlf))
-
-;;; pass an object of type SIGN to ?ins with type floor
-;;; print the object
-;(defrule sign_is_floor
-;	?ins <- (object (is-a SIGN) (color full))
-;	=>
-;	(printout t "this is an instance sign" crlf)
-;	(send ?ins print)
-;	(printout t crlf))
-	
-;;; test choosing an object of type SIGN and some arbitrary type
-;;; print the type of the object
-;(defrule sign_type
-;	(object (is-a SIGN) (type ?tp))
-;	=>
-;	(printout t "The chosen type is " ?tp crlf))
-	
-;;; testing passing in more info from user
-;(defrule determine_banner_length ""
-;	(not (banner_length ?))
-;	=>
-;	(assert (banner_length (ask-question "Enter the length of the banner (1/2/3)? " 1 2 3))))
-	
+       	
 ;;; =============================================================
 ;;; 	Questions to user
 ;;; ============================================================= 
 	
-(defrule determine_indoor ""
+(defrule 1_determine_indoor ""
 	(not (indoor ?))
 	=>
 	(send [sign] put-indoor (yes-or-no "Will the sign be used indoor? (yes/no) "))
-	(send [sign] print)
+	;(send [sign] print)
 	)
 	
-(defrule determine_material_structure ""
+(defrule 2_determine_business ""
+	(not (business ?))
+	=>
+	(send [sign] put-business (yes-or-no "Will the sign be used for a business? (yes/no) "))
+	;(send [sign] print)
+	)
+		
+(defrule 3_determine_material_structure ""
 	(not (structure ?))
 	=>
 	(send [material] put-structure (ask-question "What type of material structure do you want? (rigid/flexible) " rigid flexible))
-	(send [material] print)
+	;(send [material] print)
 	)
-	
-(defrule determine_engraved ""
+    
+(defrule 4_determine_reflective ""
 	?ins<-(object (is-a MATERIAL) (structure rigid))
 	=>
-	(send [sign] put-engraved (yes-or-no "Would you like the sign to be engraved? (yes/no) "))
-	(send [sign] print)
+	(send [material] put-reflective (yes-or-no "Would you like the sign to be reflective? (yes/no) "))
+	;(send [material] print)
+	)
+    
+(defrule 5_determine_glow ""
+	?ins<-(object (is-a MATERIAL) (reflective no))
+	=>
+	(send [material] put-glow (yes-or-no "Would you like the sign to glow? (yes/no) "))
+	;(send [material] print)
 	)
 	
-(defrule determine_hand_painted ""
+(defrule 6_determine_engraved ""
+	?ins<-(object (is-a MATERIAL) (glow no))
+	=>
+	(send [sign] put-engraved (yes-or-no "Would you like the sign to be engraved? (yes/no) "))
+	;(send [sign] print)
+	)
+	
+(defrule 7_determine_hand_painted ""
 	?ins<-(object (is-a SIGN) (engraved yes))
 	=>
 	(send ?ins put-hand_painted (yes-or-no "Would you like to have hand painting on the sign? (yes/no) "))
-	(send ?ins print)
+	;(send ?ins print)
+	)
+    
+(defrule 8_determine_adhesive ""
+	?ins<-(object (is-a MATERIAL) (structure flexible))
+	=>
+	(send [material] put-adhesive (yes-or-no "Is it going to be directly applied to any surface? (yes/no) "))
+	;(send [material] print)
 	)
 	
-(defrule determine_shape ""
-	?ins<-(object (is-a MATERIAL) (structure flexible))
+(defrule 9_determine_shape ""
+	(not (shape ?))
 	=>
 	(send [sign] put-shape (ask-question "What shape would you like for your sign? (rectangular/circular/irregular) " 
 	rectangular circular irregular))
-	(send [sign] print)
-	)
+	;(send [sign] print)
+	)    
 	
-(defrule determine_color ""
+(defrule 10_determine_color ""
 	(not (color ?))
 	=>
 	(send [sign] put-color (ask-question "What color scheme would you like? (full/multi) " full multi))
-	(send [sign] print)
+	;(send [sign] print)
 	)
 	
 ;;; =============================================================
 ;;; 	set rules for suggestions
 ;;; =============================================================
 
-(defrule suggest_banner
+(defrule 11_suggest_banner
 	(declare (salience -10))
 	?ins<-(object (is-a SIGN) (shape rectangular))
 	=>
