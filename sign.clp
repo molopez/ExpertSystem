@@ -131,7 +131,7 @@
 	(send [sign] put-shape (ask-question "What shape would you like for your sign? (rectangular/circular/irregular) " 
 	rectangular circular irregular))
 	;(send [sign] print)
-	)    
+     )
 	
 (defrule 10_determine_color ""
 	(not (color ?))
